@@ -3,139 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURAL FLOW | Active Theory Style V6</title>
-    <!-- 引入高阶字体 -->
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;900&display=swap" rel="stylesheet">
+    <title>NEURAL FLOW | Active Theory Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00f2ff; --bg: #050505; }
+        :root { --accent: #00ffcc; --bg: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body { 
-            background: var(--bg); 
-            color: #fff; 
-            font-family: 'Inter', sans-serif; 
-            overflow-x: hidden;
-            user-select: none;
+            background: var(--bg); color: #fff; 
+            font-family: 'Inter', sans-serif; overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 核心 WebGL 画布 */
-        #webgl-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
+        /* 渲染层 */
+        canvas#webgl {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: -1;
         }
 
-        /* 鼠标跟随圆环 */
+        /* 内容层 */
+        main { position: relative; z-index: 10; }
+        section {
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 0 10%;
+        }
+
+        .title-wrapper { overflow: hidden; }
+        h1 {
+            font-family: 'Syncopate', sans-serif;
+            font-size: clamp(3rem, 15vw, 12rem);
+            line-height: 0.9; text-transform: uppercase;
+            letter-spacing: -0.05em; text-align: center;
+            opacity: 0; transform: translateY(100%);
+        }
+
+        .sub {
+            font-size: 0.8rem; letter-spacing: 0.6em;
+            text-transform: uppercase; color: var(--accent);
+            margin-top: 2rem; opacity: 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 3rem; border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 600px; transform: scale(0.9); opacity: 0;
+        }
+
+        /* 鼠标 */
         #cursor {
-            position: fixed;
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--accent);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
+            position: fixed; width: 40px; height: 40px;
+            border: 1px solid var(--accent); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
             transform: translate(-50%, -50%);
             mix-blend-mode: difference;
-            transition: transform 0.1s ease-out;
-        }
-
-        /* 内容层布局 */
-        main { position: relative; z-index: 1; }
-
-        section {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 0 10%;
-        }
-
-        .hero-title {
-            font-family: 'Syncopate', sans-serif;
-            font-size: clamp(3rem, 12vw, 10rem);
-            font-weight: 700;
-            line-height: 0.85;
-            text-transform: uppercase;
-            text-align: center;
-            letter-spacing: -0.05em;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .hero-title span { display: block; overflow: hidden; }
-        .hero-title i { font-style: normal; display: block; }
-
-        .sub-text {
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            letter-spacing: 0.5em;
-            color: var(--accent);
-            text-transform: uppercase;
-            opacity: 0.8;
-        }
-
-        .content-card {
-            max-width: 500px;
-            background: rgba(255,255,255,0.03);
-            border-left: 2px solid var(--accent);
-            padding: 40px;
-            backdrop-filter: blur(20px);
-            opacity: 0;
-            transform: translateX(-50px);
-        }
-
-        .scroll-hint {
-            position: absolute;
-            bottom: 40px;
-            font-size: 0.7rem;
-            letter-spacing: 0.2em;
-            color: #666;
         }
     </style>
 </head>
 <body>
 
     <div id="cursor"></div>
-    <canvas id="webgl-canvas"></canvas>
+    <canvas id="webgl"></canvas>
 
     <main>
-        <!-- 第一屏：震撼开场 -->
-        <section>
-            <div class="hero-title">
-                <span><i class="t-up">NEURAL</i></span>
-                <span><i class="t-up">FLOW</i></span>
-            </div>
-            <p class="sub-text">Beyond Digital Reality</p>
-            <div class="scroll-hint">SCROLL TO IMMERSE</div>
+        <section id="hero">
+            <div class="title-wrapper"><h1>Neural</h1></div>
+            <div class="title-wrapper"><h1>Flow</h1></div>
+            <p class="sub">Advanced Visual Lab</p>
         </section>
 
-        <!-- 第二屏：交互感应 -->
-        <section>
-            <div class="content-card" id="card-trigger">
-                <h2 style="font-family:'Syncopate'; margin-bottom:1rem;">LIQUID ENGINE</h2>
-                <p style="color:#aaa; line-height:1.6;">每一个像素的扰动都由 GPU 进行流体计算。这不仅是设计，更是代码与艺术的深度交织。</p>
+        <section id="about">
+            <div class="card">
+                <h2 style="font-family:'Syncopate'; margin-bottom:1rem;">THE TECH</h2>
+                <p style="color:#888; line-height:1.6;">受 Active Theory 启发，我们使用自定义 GLSL 着色器来模拟数字世界的液态生命。每一个像素的位移都经过复杂的噪波算法处理。</p>
             </div>
         </section>
 
-        <!-- 第三屏：结尾 -->
-        <section>
-            <h1 style="font-family:'Syncopate'; font-size:5vw;">FUTURE IS NOW</h1>
-            <p style="margin-top:20px;">CONTACT@NEURALFLOW.IO</p>
+        <section id="footer">
+            <h1 style="font-size: 5vw;">Next Gen</h1>
+            <p style="margin-top:20px;">READY FOR V6.0</p>
         </section>
     </main>
 
-    <!-- 依赖库 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/lenis@1.0.28/dist/lenis.min.js"></script>
+    <!-- 引用稳定的库 -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.5/dist/ScrollTrigger.min.js"></script>
 
-    <!-- 着色器代码 -->
-    <script id="vertexShader" type="x-shader/x-vertex">
+    <!-- Shader 逻辑 -->
+    <script id="vShader" type="x-shader/x-vertex">
         varying vec2 vUv;
         void main() {
             vUv = uv;
@@ -143,127 +98,116 @@
         }
     </script>
 
-    <script id="fragmentShader" type="x-shader/x-fragment">
+    <script id="fShader" type="x-shader/x-fragment">
         precision highp float;
         uniform float uTime;
         uniform vec2 uMouse;
-        uniform vec2 uResolution;
+        uniform vec2 uRes;
         varying vec2 vUv;
 
-        // 随机与噪波函数
-        float rand(vec2 n) { return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }
-        
+        // 强力液态噪声
         void main() {
             vec2 uv = vUv;
-            vec2 m = uMouse;
+            float t = uTime * 0.4;
             
-            // 基础流体算法
-            float t = uTime * 0.5;
-            vec2 distortedUv = uv;
-            distortedUv.x += sin(uv.y * 10.0 + t) * 0.05;
-            distortedUv.y += cos(uv.x * 10.0 + t) * 0.05;
-
-            // 鼠标交互力场
-            float dist = distance(uv, m);
-            float strength = 1.0 / (dist * 10.0 + 1.0);
+            // 基础流动
+            vec2 p = uv * 2.0 - 1.0;
+            p.x *= uRes.x / uRes.y;
             
-            // RGB 分离效果 (Active Theory 经典招牌)
-            float r = rand(distortedUv + 0.01 * strength);
-            float g = rand(distortedUv);
-            float b = rand(distortedUv - 0.01 * strength);
-
-            // 渐变色彩设计
-            vec3 color1 = vec3(0.0, 0.9, 1.0); // 电光蓝
-            vec3 color2 = vec3(0.5, 0.0, 1.0); // 幻影紫
+            for(float i = 1.0; i < 4.0; i++) {
+                p.x += 0.3 / i * sin(i * 3.0 * p.y + t + uMouse.x * 2.0);
+                p.y += 0.3 / i * cos(i * 3.0 * p.x + t + uMouse.y * 2.0);
+            }
             
-            float noise = fract(sin(dot(distortedUv ,vec2(12.9898,78.233))) * 43758.5453);
-            vec3 finalColor = mix(color1, color2, uv.y + strength);
+            // RGB 色彩叠加
+            float r = sin(p.x + p.y + 1.0) * 0.5 + 0.5;
+            float g = sin(p.x + p.y + 2.0) * 0.5 + 0.5;
+            float b = sin(p.x + p.y + 3.0) * 0.5 + 0.5;
             
-            // 结合噪波和暗角
-            finalColor *= noise * 0.2 + 0.8;
-            finalColor *= (1.0 - dist * 0.5);
+            vec3 color = vec3(r * 0.1, g * 0.4, b * 0.8);
+            color += 0.05 / length(p); // 增加中心光感
             
-            gl_FragColor = vec4(finalColor * 0.5, 1.0);
+            gl_FragColor = vec4(color, 1.0);
         }
     </script>
 
     <script>
         // 1. WebGL 初始化
-        const canvas = document.getElementById('webgl-canvas');
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        let scene, camera, renderer, material;
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.Camera();
-        const geometry = new THREE.PlaneGeometry(2, 2);
-        const uniforms = {
-            uTime: { value: 0 },
-            uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-            uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
-        };
+        function initWebGL() {
+            const canvas = document.getElementById('webgl');
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        const material = new THREE.ShaderMaterial({
-            uniforms,
-            vertexShader: document.getElementById('vertexShader').textContent,
-            fragmentShader: document.getElementById('fragmentShader').textContent
-        });
+            scene = new THREE.Scene();
+            camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            material = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0 },
+                    uMouse: { value: new THREE.Vector2(0, 0) },
+                    uRes: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+                },
+                vertexShader: document.getElementById('vShader').textContent,
+                fragmentShader: document.getElementById('fShader').textContent
+            });
 
-        // 2. 丝滑滚动 (Lenis)
-        const lenis = new Lenis();
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
         }
-        requestAnimationFrame(raf);
 
-        // 3. 鼠标交互
-        window.addEventListener('mousemove', (e) => {
-            const x = e.clientX / window.innerWidth;
-            const y = 1.0 - (e.clientY / window.innerHeight);
-            gsap.to(uniforms.uMouse.value, { x: x, y: y, duration: 1 });
-            gsap.to('#cursor', { x: e.clientX, y: e.clientY, duration: 0.2 });
-        });
+        // 2. 交互与动画
+        function initInteractions() {
+            // 鼠标跟随
+            window.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth);
+                const y = 1.0 - (e.clientY / window.innerHeight);
+                gsap.to(material.uniforms.uMouse.value, { x, y, duration: 1 });
+                gsap.to('#cursor', { x: e.clientX, y: e.clientY, duration: 0.1 });
+            });
 
-        // 4. GSAP 动画序列
-        gsap.registerPlugin(ScrollTrigger);
+            // GSAP 开场动画
+            const tl = gsap.timeline();
+            tl.to('h1', { opacity: 1, y: 0, duration: 1.5, stagger: 0.2, ease: "expo.out" })
+              .to('.sub', { opacity: 1, duration: 1 }, "-=1");
 
-        // 入场动画
-        gsap.from('.t-up', {
-            y: 300,
-            skewY: 20,
-            duration: 2,
-            stagger: 0.2,
-            ease: "power4.out"
-        });
+            // 滚动触发
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.to('.card', {
+                scrollTrigger: {
+                    trigger: '.card',
+                    start: "top 90%",
+                    end: "bottom 20%",
+                    scrub: true
+                },
+                opacity: 1,
+                scale: 1
+            });
+        }
 
-        // 滚动卡片入场
-        gsap.to('.content-card', {
-            scrollTrigger: {
-                trigger: '#card-trigger',
-                start: "top 80%",
-                end: "bottom 20%",
-                toggleActions: "play reverse play reverse"
-            },
-            opacity: 1,
-            x: 0,
-            duration: 1
-        });
-
-        // 渲染循环
         function animate(time) {
-            uniforms.uTime.value = time * 0.001;
+            if(material) material.uniforms.uTime.value = time * 0.001;
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
-        animate();
 
-        // 窗口适配
+        // 启动
+        try {
+            initWebGL();
+            initInteractions();
+            requestAnimationFrame(animate);
+            console.log("NEURAL FLOW: System Online");
+        } catch (e) {
+            console.error("WebGL Failed:", e);
+            document.body.innerHTML += "<div style='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:red;'>WebGL Initialize Failed.</div>";
+        }
+
         window.addEventListener('resize', () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
-            uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+            material.uniforms.uRes.value.set(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
