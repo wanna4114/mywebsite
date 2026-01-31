@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEURAL FLOW | Active Theory Style V6</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #00f2ff; --bg: #050505; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden;
+            /* 兜底背景：万一WebGL失效也能看到动态感 */
+            background: linear-gradient(45deg, #050505, #1a1a2e);
+        }
+
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 鼠标圆环 */
+        #cursor {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%); /* 确保圆心对准鼠标 */
+            mix-blend-mode: difference;
+            background: rgba(255,255,255,0.1);
+        }
+
+        main { position: relative; z-index: 1; }
+
+        section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 10%;
+        }
+
+        .title-container { overflow: hidden; }
+
+        h1 {
+            font-family: 'Syncopate', sans-serif;
+            font-size: clamp(3rem, 12vw, 10rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            transform: translateY(100%); /* 初始位置供GSAP动画调用 */
+        }
+
+        .description {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            letter-spacing: 0.5em;
+            color: var(--accent);
+            text-transform: uppercase;
+            max-width: 600px;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-bottom: 50px;
+            font-size: 0.7rem;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <canvas id="webgl-canvas"></canvas>
+
+    <main id="main-content">
+        <section>
+            <div class="title-container">
+                <h1 id="hero-title">NEURAL<br>FLOW</h1>
+            </div>
+            <p class="description">Active Theory Inspired Experience V6</p>
+            <div class="footer">EST. 2024 / DIGITAL REALITY SIMULATION</div>
+        </section>
+
+        <section style="align-items: flex-end; text-align: right;">
+            <div class="title-container">
+                <h1 class="scroll-title">LIQUID</h1>
+            </div>
+            <p class="description">GPU Accelerated Fluid Dynamics</p>
+        </section>
+
+        <section>
+            <div class="title-container">
+                <h1 class="scroll-title">PULSE</h1>
+            </div>
+            <p class="description">Beyond the Screen Limits</p>
+        </section>
+    </main>
+
+    <!-- 引用稳定的 CDN 地址 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Shader：使用最兼容的 GLSL 语法 -->
+    <script id="vertexShader" type="x-shader/x-vertex">
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = vec4(position, 1.0);
+        }
+    </script>
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+		// 请替换你原代码中的 fragmentShader 部分
+		precision mediump float;
+		uniform float uTime;
+		uniform vec2 uMouse;
+		uniform vec2 uRes;
+		varying vec2 vUv;
+
+		void main() {
+			vec2 uv = vUv;
+			float time = uTime * 0.3;
+			
+			// 1. 创建多层波浪
+			vec2 p = uv * 3.0 - 1.5;
+			p.x *= uRes.x / uRes.y;
+			
+			for(float n = 1.0; n < 6.0; n++) {
+				p.x += 0.4 / n * sin(n * p.y + time + uMouse.x * 3.0);
+				p.y += 0.4 / n * cos(n * p.x + time + uMouse.y * 3.0);
+			}
+			
+			// 2. 实现 RGB 偏移 (Active Theory 核心视觉)
+			// 偏移量由 p 的数值决定
+			float r = sin(p.x + p.y + 1.0) * 0.5 + 0.5;
+			float g = sin(p.x + p.y + 1.1) * 0.5 + 0.5; // 注意这里微小的 1.1 偏移
+			float b = sin(p.x + p.y + 1.2) * 0.5 + 0.5; // 注意这里微小的 1.2 偏移
+			
+			vec3 color = vec3(r * 0.1, g * 0.3, b * 0.6);
+			
+			// 3. 增强边缘光
+			float flare = 0.01 / length(p);
+			color += flare;
+			
+			// 4. 叠加一点点数字底噪
+			float grain = fract(sin(dot(uv, vec2(12.9898,78.233))) * 43758.5453) * 0.05;
+			color += grain;
+
+			gl_FragColor = vec4(color, 1.0);
+		}
+	</script>
+
+    <script>
+        // 1. 初始化 WebGL
+        const canvas = document.getElementById('webgl-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false }); // 关闭抗锯齿提升兼容性
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.Camera(); // 使用默认相机
+
+        const uniforms = {
+            uTime: { value: 0 },
+            uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+            uRes: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+        };
+
+        const geometry = new THREE.PlaneGeometry(2, 2);
+        const material = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: document.getElementById('vertexShader').textContent,
+            fragmentShader: document.getElementById('fragmentShader').textContent
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        // 2. 鼠标交互
+        const cursor = document.getElementById('cursor');
+        window.addEventListener('mousemove', (e) => {
+            // 更新自定义鼠标位置（使用GSAP平滑）
+            gsap.to(cursor, {
+                x: e.clientX,
+                y: e.clientY,
+                duration: 0.1,
+                ease: "power2.out"
+            });
+
+            // 传值给着色器
+            const x = e.clientX / window.innerWidth;
+            const y = 1.0 - (e.clientY / window.innerHeight);
+            gsap.to(uniforms.uMouse.value, { x: x, y: y, duration: 0.5 });
+        });
+
+        // 3. 页面动画 (GSAP)
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 初始入场动画
+        gsap.to('#hero-title', {
+            y: 0,
+            duration: 1.5,
+            ease: "expo.out",
+            delay: 0.5
+        });
+
+        // 滚动时的文字错位感 (Active Theory 风格)
+        gsap.utils.toArray('.scroll-title').forEach(title => {
+            gsap.to(title, {
+                scrollTrigger: {
+                    trigger: title,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: 1
+                },
+                y: 0,
+                skewX: -10,
+                duration: 1
+            });
+        });
+
+        // 4. 渲染循环
+        function animate(time) {
+            uniforms.uTime.value = time * 0.001;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        // 启动
+        animate();
+
+        // 适配窗口
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            uniforms.uRes.value.set(window.innerWidth, window.innerHeight);
+        });
+
+        console.log("NEURAL FLOW: System Initialized Successfully");
+    </script>
+</body>
+</html>
