@@ -3,31 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURAL FLOW | Active Theory Style</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+    <title>NEURAL FLOW | Active Theory Style V6</title>
+    <!-- 引入高阶字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00f2ff; }
+        :root { --accent: #00f2ff; --bg: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body { 
-            background: #000; 
+            background: var(--bg); 
             color: #fff; 
             font-family: 'Inter', sans-serif; 
             overflow-x: hidden;
-            background-color: #050505;
+            user-select: none;
         }
 
-        /* 强制画布全屏 */
-        #canvas-container {
+        /* 核心 WebGL 画布 */
+        #webgl-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 0;
-            pointer-events: none;
+            z-index: -1;
         }
 
-        /* 页面内容 */
+        /* 鼠标跟随圆环 */
+        #cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* 内容层布局 */
         main { position: relative; z-index: 1; }
 
         section {
@@ -37,93 +52,79 @@
             justify-content: center;
             align-items: center;
             padding: 0 10%;
-            text-align: center;
         }
 
-        .hero h1 {
+        .hero-title {
             font-family: 'Syncopate', sans-serif;
-            font-size: 10vw;
-            line-height: 0.9;
+            font-size: clamp(3rem, 12vw, 10rem);
+            font-weight: 700;
+            line-height: 0.85;
             text-transform: uppercase;
-            letter-spacing: -0.02em;
-            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: -0.05em;
+            display: flex;
+            flex-direction: column;
         }
 
-        .hero p {
-            font-size: 1.5rem;
+        .hero-title span { display: block; overflow: hidden; }
+        .hero-title i { font-style: normal; display: block; }
+
+        .sub-text {
+            margin-top: 2rem;
+            font-size: 0.9rem;
             letter-spacing: 0.5em;
-            text-transform: uppercase;
             color: var(--accent);
+            text-transform: uppercase;
             opacity: 0.8;
         }
 
-        .card-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            width: 100%;
-            max-width: 1200px;
+        .content-card {
+            max-width: 500px;
+            background: rgba(255,255,255,0.03);
+            border-left: 2px solid var(--accent);
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            transform: translateX(-50px);
         }
 
-        .card {
-            background: rgba(255,255,255,0.05);
-            padding: 60px;
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            text-align: left;
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: #666;
         }
-
-        .card h3 { font-family: 'Syncopate'; margin-bottom: 20px; color: var(--accent); }
-
-        /* 自定义鼠标 */
-        #cursor {
-            position: fixed;
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--accent);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 10000;
-            transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s;
-        }
-
-        .footer { font-size: 0.8rem; color: #444; }
     </style>
 </head>
 <body>
 
     <div id="cursor"></div>
-    <div id="canvas-container"></div>
+    <canvas id="webgl-canvas"></canvas>
 
     <main>
-        <!-- 第一屏 -->
-        <section class="hero">
-            <div class="reveal">
-                <h1>NEURAL<br>FLOW</h1>
-            </div>
-            <p>BEYOND DIGITAL LIMITS</p>
-        </section>
-
-        <!-- 第二屏 -->
+        <!-- 第一屏：震撼开场 -->
         <section>
-            <div class="card-grid">
-                <div class="card">
-                    <h3>IMMERSIVE</h3>
-                    <p>利用 WebGL 打造突破维度的视觉张力，让每一个像素都具备生命力。</p>
-                </div>
-                <div class="card">
-                    <h3>FLUIDITY</h3>
-                    <p>丝滑的交互响应，基于高阶数学函数的流体模拟，拒绝平庸。</p>
-                </div>
+            <div class="hero-title">
+                <span><i class="t-up">NEURAL</i></span>
+                <span><i class="t-up">FLOW</i></span>
+            </div>
+            <p class="sub-text">Beyond Digital Reality</p>
+            <div class="scroll-hint">SCROLL TO IMMERSE</div>
+        </section>
+
+        <!-- 第二屏：交互感应 -->
+        <section>
+            <div class="content-card" id="card-trigger">
+                <h2 style="font-family:'Syncopate'; margin-bottom:1rem;">LIQUID ENGINE</h2>
+                <p style="color:#aaa; line-height:1.6;">每一个像素的扰动都由 GPU 进行流体计算。这不仅是设计，更是代码与艺术的深度交织。</p>
             </div>
         </section>
 
-        <!-- 第三屏 -->
-        <section class="hero">
-            <h1>FUTURE</h1>
-            <p>REDEFINING THE WEB V6.0</p>
-            <div class="footer" style="margin-top: 100px;">COPYRIGHT 2024 © NEURAL FLOW LAB</div>
+        <!-- 第三屏：结尾 -->
+        <section>
+            <h1 style="font-family:'Syncopate'; font-size:5vw;">FUTURE IS NOW</h1>
+            <p style="margin-top:20px;">CONTACT@NEURALFLOW.IO</p>
         </section>
     </main>
 
@@ -133,12 +134,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://unpkg.com/lenis@1.0.28/dist/lenis.min.js"></script>
 
-    <!-- WebGL 着色器 -->
+    <!-- 着色器代码 -->
     <script id="vertexShader" type="x-shader/x-vertex">
         varying vec2 vUv;
         void main() {
             vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            gl_Position = vec4(position, 1.0);
         }
     </script>
 
@@ -149,87 +150,52 @@
         uniform vec2 uResolution;
         varying vec2 vUv;
 
-        // 噪声函数：制造液态感
-        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-        float snoise(vec3 v) {
-            const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-            const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-            vec3 i  = floor(v + dot(v, C.yyy) );
-            vec3 x0 =   v - i + dot(i, C.xxx) ;
-            vec3 g = step(x0.yzx, x0.xyz);
-            vec3 l = 1.0 - g;
-            vec3 i1 = min( g.xyz, l.zxy );
-            vec3 i2 = max( g.xyz, l.zxy );
-            vec3 x1 = x0 - i1 + C.xxx;
-            vec3 x2 = x0 - i2 + C.yyy;
-            vec3 x3 = x0 - D.yyy;
-            i = mod289(i); 
-            vec4 p = permute( permute( permute( 
-                     i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-                   + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) 
-                   + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-            float n_ = 0.142857142857;
-            vec3  ns = n_ * D.wyz - D.xzx;
-            vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-            vec4 x_ = floor(j * ns.z);
-            vec4 y_ = floor(j - 7.0 * x_ );
-            vec4 x = x_ *ns.x + ns.yyww;
-            vec4 y = y_ *ns.x + ns.yyww;
-            vec4 h = 1.0 - abs(x) - abs(y);
-            vec4 b0 = vec4( x.xy, y.xy );
-            vec4 b1 = vec4( x.zw, y.zw );
-            vec4 s0 = floor(b0)*2.0 + 1.0;
-            vec4 s1 = floor(b1)*2.0 + 1.0;
-            vec4 sh = -step(h, vec4(0.0));
-            vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-            vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
-            vec3 p0 = vec3(a0.xy,h.x);
-            vec3 p1 = vec3(a0.zw,h.y);
-            vec3 p2 = vec3(a1.xy,h.z);
-            vec3 p3 = vec3(a1.zw,h.w);
-            vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-            p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-            vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-            m = m * m;
-            return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
-        }
-
+        // 随机与噪波函数
+        float rand(vec2 n) { return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }
+        
         void main() {
             vec2 uv = vUv;
-            // 基础噪声
-            float noise = snoise(vec3(uv * 1.5, uTime * 0.4));
+            vec2 m = uMouse;
             
-            // 鼠标扭曲效果
-            float mouseDist = distance(uv, uMouse);
-            float strength = 0.5 / (mouseDist + 0.4);
+            // 基础流体算法
+            float t = uTime * 0.5;
+            vec2 distortedUv = uv;
+            distortedUv.x += sin(uv.y * 10.0 + t) * 0.05;
+            distortedUv.y += cos(uv.x * 10.0 + t) * 0.05;
+
+            // 鼠标交互力场
+            float dist = distance(uv, m);
+            float strength = 1.0 / (dist * 10.0 + 1.0);
             
-            // 颜色分层 (Active Theory 风格的蓝绿色系)
-            vec3 color1 = vec3(0.0, 0.95, 1.0); // 亮蓝
-            vec3 color2 = vec3(0.1, 0.1, 0.2); // 深蓝背景
+            // RGB 分离效果 (Active Theory 经典招牌)
+            float r = rand(distortedUv + 0.01 * strength);
+            float g = rand(distortedUv);
+            float b = rand(distortedUv - 0.01 * strength);
+
+            // 渐变色彩设计
+            vec3 color1 = vec3(0.0, 0.9, 1.0); // 电光蓝
+            vec3 color2 = vec3(0.5, 0.0, 1.0); // 幻影紫
             
-            float mixer = smoothstep(-1.0, 1.0, noise + strength * 0.2);
-            vec3 finalColor = mix(color2, color1 * (noise * 0.5 + 0.5), mixer);
+            float noise = fract(sin(dot(distortedUv ,vec2(12.9898,78.233))) * 43758.5453);
+            vec3 finalColor = mix(color1, color2, uv.y + strength);
             
-            // 边缘调暗
-            finalColor *= 1.2 - distance(uv, vec2(0.5));
+            // 结合噪波和暗角
+            finalColor *= noise * 0.2 + 0.8;
+            finalColor *= (1.0 - dist * 0.5);
             
-            gl_FragColor = vec4(finalColor, 1.0);
+            gl_FragColor = vec4(finalColor * 0.5, 1.0);
         }
     </script>
 
     <script>
-        // --- 1. 初始化场景 ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        // 1. WebGL 初始化
+        const canvas = document.getElementById('webgl-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        const geometry = new THREE.PlaneGeometry(5, 5, 32, 32);
+        const scene = new THREE.Scene();
+        const camera = new THREE.Camera();
+        const geometry = new THREE.PlaneGeometry(2, 2);
         const uniforms = {
             uTime: { value: 0 },
             uMouse: { value: new THREE.Vector2(0.5, 0.5) },
@@ -237,69 +203,56 @@
         };
 
         const material = new THREE.ShaderMaterial({
-            uniforms: uniforms,
+            uniforms,
             vertexShader: document.getElementById('vertexShader').textContent,
             fragmentShader: document.getElementById('fragmentShader').textContent
         });
 
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.z = 2;
         scene.add(mesh);
 
-        // --- 2. 交互逻辑 ---
-        const cursor = document.getElementById('cursor');
-        window.addEventListener('mousemove', (e) => {
-            // 更新自定义鼠标位置
-            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.3 });
-            
-            // 将鼠标坐标传给着色器 (归一化 0 到 1)
-            const x = e.clientX / window.innerWidth;
-            const y = 1.0 - (e.clientY / window.innerHeight);
-            gsap.to(uniforms.uMouse.value, { x: x, y: y, duration: 0.8 });
-        });
-
-        // --- 3. 丝滑滚动 (Lenis) ---
+        // 2. 丝滑滚动 (Lenis)
         const lenis = new Lenis();
-        lenis.on('scroll', (e) => {
-            // 滚动时背景产生轻微位移感
-            mesh.rotation.z = e.scroll * 0.0005;
-            mesh.position.y = e.scroll * 0.001;
-        });
-
         function raf(time) {
             lenis.raf(time);
             requestAnimationFrame(raf);
         }
         requestAnimationFrame(raf);
 
-        // --- 4. 动画特效 (GSAP) ---
+        // 3. 鼠标交互
+        window.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = 1.0 - (e.clientY / window.innerHeight);
+            gsap.to(uniforms.uMouse.value, { x: x, y: y, duration: 1 });
+            gsap.to('#cursor', { x: e.clientX, y: e.clientY, duration: 0.2 });
+        });
+
+        // 4. GSAP 动画序列
         gsap.registerPlugin(ScrollTrigger);
 
-        // 首页文字入场
-        gsap.from(".hero h1", {
-            y: 200,
-            skewY: 10,
-            opacity: 0,
+        // 入场动画
+        gsap.from('.t-up', {
+            y: 300,
+            skewY: 20,
             duration: 2,
+            stagger: 0.2,
             ease: "power4.out"
         });
 
-        // 滚动卡片动画
-        gsap.utils.toArray(".card").forEach(card => {
-            gsap.from(card, {
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top bottom",
-                    end: "top center",
-                    scrub: 1
-                },
-                x: -100,
-                opacity: 0,
-                rotateX: 45
-            });
+        // 滚动卡片入场
+        gsap.to('.content-card', {
+            scrollTrigger: {
+                trigger: '#card-trigger',
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play reverse play reverse"
+            },
+            opacity: 1,
+            x: 0,
+            duration: 1
         });
 
-        // --- 5. 渲染循环 ---
+        // 渲染循环
         function animate(time) {
             uniforms.uTime.value = time * 0.001;
             renderer.render(scene, camera);
@@ -307,10 +260,8 @@
         }
         animate();
 
-        // 窗口尺寸适配
+        // 窗口适配
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
         });
